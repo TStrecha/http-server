@@ -1,10 +1,10 @@
 all: compile
 
 compile:
-	gcc -I. -g -o target/server main.c comm/request.c comm/response.c comm/server.c lib/lib.c lib/map.c lib/error.c lib/mem.c log/log.c -lws2_32 -DLOG_USE_COLOR
+	gcc -Isrc/ -g -o target/server src/main.c src/comm/request.c src/comm/response.c src/comm/server.c src/lib/lib.c src/lib/map.c src/lib/error.c src/lib/mem.c src/log/log.c -lws2_32 -DLOG_USE_COLOR
 
 debug:
-	gcc -I. -g -o target/server-debug main.c comm/request.c comm/response.c comm/server.c lib/lib.c lib/map.c lib/error.c lib/mem.c log/log.c -lws2_32 -DLOG_USE_COLOR -DMEMDEB
+	gcc -Isrc/ -g -o target/server-debug src/main.c src/comm/request.c src/comm/response.c src/comm/server.c src/lib/lib.c src/lib/map.c src/lib/error.c src/lib/mem.c src/log/log.c -lws2_32 -DLOG_USE_COLOR -DMEMDEB
 
 clean:
 	del main.exe
