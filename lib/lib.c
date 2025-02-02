@@ -2,6 +2,7 @@
 #include <stdio.h>
 
 #include "lib.h"
+#include "lib/mem.h"
 
 int isNumber(char* str) {
     if (str == NULL || *str == '\0') {
@@ -23,7 +24,7 @@ char* fstring(char* fmt, ...) {
     int size = vsnprintf(NULL, 0, fmt, args);
     va_end(args);
 
-    char* formatted_str = (char*) malloc(size + 1);
+    char* formatted_str = (char*) hmalloc(size + 1);
 
     va_start(args, fmt);
     vsnprintf(formatted_str, size + 1, fmt, args);

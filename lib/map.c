@@ -2,11 +2,12 @@
 #include <string.h>
 #include <math.h>
 #include "map.h"
+#include "lib/mem.h"
 
 unsigned long strhashcode(char* str);
 
 StrStrHashMap* init_sshmap() {
-    StrStrHashMap* out = (StrStrHashMap*) malloc(sizeof(StrStrHashMap));
+    StrStrHashMap* out = (StrStrHashMap*) hmalloc(sizeof(StrStrHashMap));
     if(out == NULL) {
         return NULL;
     }
@@ -24,7 +25,7 @@ StrStrHashMap* init_sshmap() {
 int insert_sshmap(StrStrHashMap* self, char* key, char* value) {
     unsigned long hash = strhashcode(key) % self->size;
     
-    StrStrNode* new_node = (StrStrNode*) malloc(sizeof(StrStrNode));
+    StrStrNode* new_node = (StrStrNode*) hmalloc(sizeof(StrStrNode));
     new_node->key = key;
     new_node->value = value;
     new_node->next = NULL;
@@ -67,7 +68,7 @@ char* get_sshmap(StrStrHashMap* self, char* key) {
 }
 
 StrStrNode** get_all_sshmap(StrStrHashMap* self) {
-    StrStrNode** elements = (StrStrNode**) malloc(self->elements * sizeof(StrStrNode*));
+    StrStrNode** elements = (StrStrNode**) hmalloc(self->elements * sizeof(StrStrNode*));
     int elementCount = 0;
 
     for(int i = 0; i < self->size; i++) {

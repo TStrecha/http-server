@@ -1,5 +1,6 @@
 #include "response.h"
 #include "lib/lib.h"
+#include "lib/mem.h"
 #include "log/log.h"
 
 int sendResponse(SOCKET clientSocket, Response* response) {
@@ -32,7 +33,7 @@ int sendResponse(SOCKET clientSocket, Response* response) {
 
     int result = send(clientSocket, payload, strlen(payload), 0);
     
-    free(payload);
+    hfree(payload);
     
     return result;
 }

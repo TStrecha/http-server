@@ -8,6 +8,7 @@
 #include "lib/lib.h"
 #include "lib/map.h"
 #include "lib/error.h"
+#include "lib/mem.h"
 
 StrStrHashMap* extractHeaders(char* headers);
 
@@ -19,7 +20,7 @@ int parseMethod(RequestMethod* method, char* methodPart);
 int parseProtocol(Protocol* protocol, char* pvPart);
 
 Request* readRequest(SOCKET clientSocket) {
-    char* recvbuffer = (char*) malloc(READ_BUFFER_SIZE + 1);
+    char* recvbuffer = (char*) hmalloc(READ_BUFFER_SIZE + 1);
     if(recvbuffer == NULL) {
         return NULL;
     }
@@ -28,9 +29,10 @@ Request* readRequest(SOCKET clientSocket) {
     if(payload_size <= 0) {
         log_wsa_err("Recv failed.");
 
-        free(recvbuffer);
+        hfree(recvbuffer);
         return NULL;
     }
+
     int res;
 
     char* header;
@@ -49,13 +51,14 @@ Request* readRequest(SOCKET clientSocket) {
     parseRequestLineRaw(&rlRaw, req_line);
     log_info("(CL%d) Got request %s %s through %s", clientSocket, rlRaw.method, rlRaw.path, rlRaw.protocol);
 
-    RequestLine* rl = (RequestLine*) malloc(sizeof(RequestLine));
+    RequestLine* rl = (RequestLine*) hmalloc(sizeof(RequestLine));
     res = parseRequestLine(rl, &rlRaw);
     check_res_ret_ptr(res);
 
     StrStrHashMap* headers = extractHeaders(header + strlen(req_line));
 
-    Request* request = (Request*) malloc(sizeof(Request));
+
+    Request* request = (Request*) hmalloc(sizeof(Request));
     if(request == NULL) {
         return NULL;
     }
@@ -63,6 +66,8 @@ Request* readRequest(SOCKET clientSocket) {
     request->req_line = rl;
     request->headers = headers;
     request->body = body;
+
+    hfree(recvbuffer);
 
     return request;
 }
@@ -72,7 +77,7 @@ int extractHeaderFromPayload(char** out, char* payload) {
     char* delimiter = strstr(payload, "\r\n\r\n");
     int buff_size = delimiter - payload;
     
-    char* buff = (char*) malloc(buff_size + 1);
+    char* buff = (char*) hmalloc(buff_size + 1);
     if(buff == NULL) {
         fnErrMsg("Memory allocation error.");
         return MEMALLOCERR;
@@ -92,7 +97,7 @@ int extractBodyFromPayload(char** out, char* payload, int headerSize) {
     }
 
     int buff_size = strlen(payload) - headerSize;
-    char* buff = (char*) malloc(buff_size + 1);
+    char* buff = (char*) hmalloc(buff_size + 1);
     if(buff == NULL) {
         fnErrMsg("Memory allocation error.");
         return MEMALLOCERR;
@@ -114,7 +119,7 @@ int extractRequestLineFromHeader(char** out, char* header) {
     }
 
     int requestLineSize = requestLineEndLoc - header;
-    char* requestLine = (char*) malloc(requestLineSize + 1);
+    char* requestLine = (char*) hmalloc(requestLineSize + 1);
     if(requestLine == NULL) {
         fnErrMsg("Memory allocation error.");
         return MEMALLOCERR;
@@ -130,9 +135,9 @@ int extractRequestLineFromHeader(char** out, char* header) {
 
 
 int parseRequestLineRaw(RequestLineRaw* out, char* requestLine) {
-    char* method = (char*) malloc(10);
-    char* path = (char*) malloc(1024);
-    char* prot_ver = (char*) malloc(16);
+    char* method = (char*) hmalloc(10);
+    char* path = (char*) hmalloc(1024);
+    char* prot_ver = (char*) hmalloc(16);
 
     if(sscanf(requestLine, "%9s %1023s %15s", method, path, prot_ver) < 3) {
         return REQ_MALFORMEDREQLINE;
@@ -156,7 +161,7 @@ int parseRequestLine(RequestLine* out, RequestLineRaw* rlRaw) {
         return err;
     }
 
-    out->path = malloc(strlen(rlRaw->path) + 1);
+    out->path = hmalloc(strlen(rlRaw->path) + 1);
     if(out->path == NULL) {
         fnErrMsg("Memory allocation error.");
         return MEMALLOCERR;
@@ -182,14 +187,14 @@ StrStrHashMap* extractHeaders(char* headers) {
         int keyLength = separatorLoc - token;
         int valueLength = strlen(token) - keyLength - 2;
 
-        char* key = (char*) malloc(keyLength + 1);
+        char* key = (char*) hmalloc(keyLength + 1);
         if(key == NULL) {
             return NULL;
         }
         strncpy(key, token, keyLength);
         key[keyLength] = '\0';
 
-        char* value = (char*) malloc(valueLength + 1);
+        char* value = (char*) hmalloc(valueLength + 1);
         if(value == NULL) {
             return NULL;
         }
