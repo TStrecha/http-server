@@ -15,7 +15,6 @@
 
 Server create_server() {
     StrHashMap* routes = init_shmap();
-    insert_shmap(routes, "ERR(404)", &handle404);
 
     Server server = {
         .routes = routes,
@@ -94,10 +93,9 @@ int start_server(Server* server) {
                     server->notFoundHandler(request, &response);
                 } else {
                     route_handler(request, &response);
-                    
                 }
             } else {
-                 server->serverErrorHandler(request, &response);
+                server->serverErrorHandler(request, &response);
             }
 
             int responseLength = sendResponse(clientSocket, &response);
