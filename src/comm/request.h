@@ -1,6 +1,7 @@
 #ifndef _REQUEST_H_
 #define _REQUEST_H_
 
+#include <winsock.h>
 #include "lib/map.h"
 
 #define READ_BUFFER_SIZE (10 * 1024 * 1024)

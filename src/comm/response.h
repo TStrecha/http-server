@@ -4,7 +4,6 @@
 #include <winsock.h>
 
 #include "lib/map.h"
-#include "request.h"
 #include "response.h"
 
 #define CT_TEXT_PLAIN "text/plain"
@@ -23,8 +22,6 @@ typedef struct {
     char* contentType;
     char* content;
 } Response;
-
-typedef void (*RouteHandler) (Request*, Response*);
 
 int sendResponse(SOCKET clientSocket, Response* response);
 char* getStatusCodeAsStr(StatusCode code);

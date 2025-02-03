@@ -2,9 +2,14 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "comm/request.h"
+#include "comm/response.h"
 #include "log/log.h"
 #include "comm/server.h"
 #include "lib/lib.h"
+
+void handle_root(Request* request, Response* response);
+void handle_html(Request* request, Response* response);
 
 int main(int argc, char** argv) {
     short port = 80;
@@ -64,10 +69,23 @@ int main(int argc, char** argv) {
 
     log_set_level(log_level);
 
-    Server server = {
-        .port = port,
-        .ip = ip,
-    };
+    Server server = create_server();
+    server.ip = ip;
+    server.port = port;
+    add_route(&server, GET, "/", &handle_root);
+    add_route(&server, GET, "/html", &handle_html);
 
     return start_server(&server);
+}
+
+void handle_root(Request* request, Response* response) {
+    response->statusCode = OK;
+    response->contentType = CT_APP_JSON;
+    response->content = fstring("{\"path\": \"%s\", \"client_content\": \"%s\"}", request->req_line->path, request->body);
+}
+
+void handle_html(Request* request, Response* response) {
+    response->statusCode = OK;
+    response->contentType = CT_TEXT_HTML;
+    response->content = fstring("<html><body><h2>TEST: %s</h2></body></html>", request->body);
 }
