@@ -1,23 +1,23 @@
 #ifndef _MAP_H_
 #define _MAP_H_
 
-typedef struct StrStrNode {
+typedef struct StrKeyNode {
     char* key;
-    char* value;
-    struct StrStrNode* next;
-} StrStrNode;
+    void* value;
+    struct StrKeyNode* next;
+} StrKeyNode;
 
 #define MAP_SIZE 10
 
 typedef struct {
-    StrStrNode* buckets[MAP_SIZE];
+    StrKeyNode* buckets[MAP_SIZE];
     int size;
     int elements;
-} StrStrHashMap;
+} StrHashMap;
 
-StrStrHashMap* init_sshmap();
-char* get_sshmap(StrStrHashMap* self, char* key);
-int insert_sshmap(StrStrHashMap* self, char* key, char* value);
-StrStrNode** get_all_sshmap(StrStrHashMap* self);
+StrHashMap* init_shmap();
+void* get_shmap(StrHashMap* self, char* key);
+int insert_shmap(StrHashMap* self, char* key, void* value);
+StrKeyNode** get_all_shmap(StrHashMap* self);
 
 #endif

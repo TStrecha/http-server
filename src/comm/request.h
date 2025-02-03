@@ -27,7 +27,7 @@ typedef struct {
 
 typedef struct {
     RequestLine* req_line;
-    StrStrHashMap* headers;
+    StrHashMap* headers;
     char* body;
 } Request;
 

@@ -66,7 +66,7 @@ int start_server(Server* server) {
             log_info("(CL%d) Client connected.", clientSocket);
 
             Request* request = readRequest(clientSocket);
-            StrStrHashMap* res_headers = init_sshmap();
+            StrHashMap* res_headers = init_shmap();
             Response response = {
                 .headers = res_headers
             };

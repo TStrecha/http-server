@@ -1,4 +1,5 @@
 #include "response.h"
+#include "request.h"
 #include "lib/lib.h"
 #include "lib/mem.h"
 #include "log/log.h"
@@ -8,15 +9,14 @@ int sendResponse(SOCKET clientSocket, Response* response) {
     char* statusCode = getStatusCodeAsStr(response->statusCode);
     char* headerString = "";
 
-
     if(response->content != NULL) {
-        insert_sshmap(response->headers, "Content-Length", fstring("%d", strlen(response->content)));
-        insert_sshmap(response->headers, "Content-Type", response->contentType);
+        insert_shmap(response->headers, "Content-Length", fstring("%d", strlen(response->content)));
+        insert_shmap(response->headers, "Content-Type", response->contentType);
     }
-    StrStrNode** headers = get_all_sshmap(response->headers);
+    StrKeyNode** headers = get_all_shmap(response->headers);
 
     for (int i = 0; i < response->headers->elements; i++) {
-        StrStrNode* header = headers[i];
+        StrKeyNode* header = headers[i];
         headerString = fstring("%s%s: %s\r\n", headerString, header->key, header->value);
     }
     
@@ -32,12 +32,11 @@ int sendResponse(SOCKET clientSocket, Response* response) {
     }
 
     int result = send(clientSocket, payload, strlen(payload), 0);
-    
+
     hfree(payload);
-    
+
     return result;
 }
-
 
 char* getStatusCodeAsStr(StatusCode code) { 
     char* text;

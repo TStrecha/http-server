@@ -15,7 +15,7 @@ typedef enum {
 
 typedef struct {
     StatusCode statusCode;
-    StrStrHashMap* headers;
+    StrHashMap* headers;
     char* contentType;
     char* content;
 } Response;

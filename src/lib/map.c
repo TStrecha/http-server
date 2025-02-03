@@ -6,10 +6,10 @@
 
 unsigned long strhashcode(char* str);
 
-StrStrHashMap* init_sshmap() {
-    StrStrHashMap* out = (StrStrHashMap*) hmalloc(sizeof(StrStrHashMap));
+StrHashMap* init_shmap() {
+    StrHashMap* out = (StrHashMap*) hmalloc(sizeof(StrHashMap));
     if(out == NULL) {
-        return NULL;
+        return NULL; 
     }
 
     for (size_t i = 0; i < MAP_SIZE; i++) {
@@ -22,15 +22,15 @@ StrStrHashMap* init_sshmap() {
     return out;
 }
 
-int insert_sshmap(StrStrHashMap* self, char* key, char* value) {
+int insert_shmap(StrHashMap* self, char* key, void* value) {
     unsigned long hash = strhashcode(key) % self->size;
     
-    StrStrNode* new_node = (StrStrNode*) hmalloc(sizeof(StrStrNode));
+    StrKeyNode* new_node = (StrKeyNode*) hmalloc(sizeof(StrKeyNode));
     new_node->key = key;
     new_node->value = value;
     new_node->next = NULL;
 
-    StrStrNode* bucket_end = self->buckets[hash];
+    StrKeyNode* bucket_end = self->buckets[hash];
 
     if(bucket_end == NULL) {
         self->buckets[hash] = new_node;
@@ -47,10 +47,10 @@ int insert_sshmap(StrStrHashMap* self, char* key, char* value) {
     return 0;
 }
 
-char* get_sshmap(StrStrHashMap* self, char* key) {
+void* get_shmap(StrHashMap* self, char* key) {
     unsigned long hashcode = strhashcode(key);
     long hash = hashcode % self->size;
-    StrStrNode* bucket_end = self->buckets[hash];
+    StrKeyNode* bucket_end = self->buckets[hash];
 
     if(bucket_end == NULL) {
         return NULL;
@@ -67,12 +67,12 @@ char* get_sshmap(StrStrHashMap* self, char* key) {
     return NULL;
 }
 
-StrStrNode** get_all_sshmap(StrStrHashMap* self) {
-    StrStrNode** elements = (StrStrNode**) hmalloc(self->elements * sizeof(StrStrNode*));
+StrKeyNode** get_all_shmap(StrHashMap* self) {
+    StrKeyNode** elements = (StrKeyNode**) hmalloc(self->elements * sizeof(StrKeyNode*));
     int elementCount = 0;
 
     for(int i = 0; i < self->size; i++) {
-        StrStrNode* node = self->buckets[i];
+        StrKeyNode* node = self->buckets[i];
 
         while(node != NULL) {
             elements[elementCount] = node;

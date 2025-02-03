@@ -10,7 +10,7 @@
 #include "lib/error.h"
 #include "lib/mem.h"
 
-StrStrHashMap* extractHeaders(char* headers);
+StrHashMap* extractHeaders(char* headers);
 
 int extractHeaderFromPayload(char** out, char* payload);
 int extractBodyFromPayload(char** out, char* payload, int headerSize);
@@ -55,8 +55,7 @@ Request* readRequest(SOCKET clientSocket) {
     res = parseRequestLine(rl, &rlRaw);
     check_res_ret_ptr(res);
 
-    StrStrHashMap* headers = extractHeaders(header + strlen(req_line));
-
+    StrHashMap* headers = extractHeaders(header + strlen(req_line));
 
     Request* request = (Request*) hmalloc(sizeof(Request));
     if(request == NULL) {
@@ -173,10 +172,10 @@ int parseRequestLine(RequestLine* out, RequestLineRaw* rlRaw) {
     return NOERR;
 }
 
-StrStrHashMap* extractHeaders(char* headers) {
+StrHashMap* extractHeaders(char* headers) {
     char* token = strtok(headers, "\r\n");
 
-    StrStrHashMap* header_map = init_sshmap();
+    StrHashMap* header_map = init_shmap();
     if(header_map == NULL) {
         return NULL;
     }
@@ -201,7 +200,7 @@ StrStrHashMap* extractHeaders(char* headers) {
         strncpy(value, token + keyLength + 2, valueLength);
         value[valueLength] = '\0';
         
-        insert_sshmap(header_map, key, value);
+        insert_shmap(header_map, key, value);
 
         token = strtok(NULL, "\r\n");
     }
