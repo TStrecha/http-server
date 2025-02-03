@@ -10,8 +10,19 @@
 #include "lib/map.h"
 #include "lib/lib.h"
 #include "log/log.h"
+#include "lib/mem.h"
 
-void handleRequest(Request* request, Response* response);
+void handle_root(Request* request, Response* response) {
+    response->statusCode = OK;
+    response->contentType = CT_APP_JSON;
+    response->content = fstring("{\"path\": \"%s\", \"client_content\": \"%s\"}", request->req_line->path, request->body);
+}
+
+void handle_html(Request* request, Response* response) {
+    response->statusCode = OK;
+    response->contentType = CT_TEXT_HTML;
+    response->content = fstring("<html><body><h2>TEST: %s</h2></body></html>", request->body);
+}
 
 int start_server(Server* server) {
     WSADATA wsaData;
@@ -57,6 +68,10 @@ int start_server(Server* server) {
 
     log_info("Waiting for incoming connections at %s:%d", server->ip, server->port);
 
+    StrHashMap* route_handlers = init_shmap();
+    insert_shmap(route_handlers, "/", &handle_root);
+    insert_shmap(route_handlers, "/html", &handle_html);
+
     while(1) {
         SOCKET clientSocket = accept(serverSocket, NULL, NULL);
 
@@ -72,7 +87,12 @@ int start_server(Server* server) {
             };
 
             if(request != NULL) {
-                handleRequest(request, &response);
+                RouteHandler rh = get_shmap(route_handlers, request->req_line->path);
+                if(rh == NULL) {
+                    response.statusCode = NOT_FOUND;
+                } else {
+                    rh(request, &response);
+                }
             } else {
                 response.statusCode = INTERNAL_SERVER_ERROR;
             }
@@ -92,10 +112,4 @@ int start_server(Server* server) {
     WSACleanup();
 
     return NOERR;
-}
-
-void handleRequest(Request* request, Response* response) {
-    response->statusCode = OK;
-    response->contentType = CT_APP_JSON;
-    response->content = fstring("{\"path\": \"%s\", \"content\": \"%s\"}", request->req_line->path, request->body);
 }
