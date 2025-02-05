@@ -7,6 +7,8 @@
 #include "log/log.h"
 #include "comm/server.h"
 #include "lib/lib.h"
+#include "lib/func.h"
+#include "lib/option.h"
 
 void handle_root(Request* request, Response* response);
 void handle_html(Request* request, Response* response);
@@ -88,11 +90,13 @@ void handle_html(Request* request, Response* response) {
     response->statusCode = OK;
     response->contentType = CT_TEXT_HTML;
 
-    char* name = get_shmap(request->req_line->req_params, "name");
-
-    if(name == NULL) {
-        response->content = fstring("<html><body><h2>TEST WITHOUT NAME</h2></body></html>");
-    } else {
-        response->content = fstring("<html><body><h2>TEST: %s</h2></body></html>", name);
-    }
+    Option opt_name = option_of(get_shmap(request->req_line->req_params, "name"));
+    if_present_else(&opt_name, 
+        void_fn((void* name) {
+            response->content = fstring("<html><body><h2>TEST: %s</h2></body></html>", name);
+        }),
+        void_fn(() {
+            response->content = fstring("<html><body><h2>TEST WITHOUT NAME</h2></body></html>");
+        })
+    );
 }
