@@ -18,6 +18,7 @@ int extractRequestLineFromHeader(char** out, char* header);
 int parseRequestLine(RequestLine* out, RequestLineRaw* rlRaw);
 int parseMethod(RequestMethod* method, char* methodPart);
 int parseProtocol(Protocol* protocol, char* pvPart);
+int parseRequestParams(StrHashMap* out, char* path);
 
 Request* readRequest(SOCKET clientSocket) {
     char* recvbuffer = (char*) hmalloc(READ_BUFFER_SIZE + 1);
@@ -160,16 +161,59 @@ int parseRequestLine(RequestLine* out, RequestLineRaw* rlRaw) {
         return err;
     }
 
-    out->path = hmalloc(strlen(rlRaw->path) + 1);
+    StrHashMap* req_params = init_shmap();
+    char* path_param_start = strstr(rlRaw->path, "?");
+    int path_size = strlen(rlRaw->path);
+    if(path_param_start != NULL) {
+        err = parseRequestParams(req_params, rlRaw->path + (path_param_start - rlRaw->path + 1));
+        if(err != NOERR) {
+            return err;
+        }
+
+        path_size = strlen(rlRaw->path) - strlen(path_param_start);
+    }
+
+    out->path = hmalloc(path_size + 1);
     if(out->path == NULL) {
         fnErrMsg("Memory allocation error.");
         return MEMALLOCERR;
     }
-    strcpy(out->path, rlRaw->path);
+    strncpy(out->path, rlRaw->path, path_size);
+    out->path[path_size] = '\0';
     out->method = method;
     out->protocol = protocol;
+    out->req_params = req_params;
 
     return NOERR;
+}
+
+int parseRequestParams(StrHashMap* out, char* path) {
+    char* token = strtok(path, "&");
+
+    while(token != NULL) {
+        char* separatorLoc = strstr(token, "=");
+
+        int keyLength = separatorLoc - token;
+        int valueLength = strlen(token) - keyLength - 1;
+
+        char* key = (char*) hmalloc(keyLength + 1);
+        if(key == NULL) {
+            return MEMALLOCERR;
+        }
+        strncpy(key, token, keyLength);
+        key[keyLength] = '\0';
+
+        char* value = (char*) hmalloc(valueLength + 1);
+        if(value == NULL) {
+            return MEMALLOCERR;
+        }
+        strncpy(value, token + keyLength + 1, valueLength);
+        value[valueLength] = '\0';
+        
+        insert_shmap(out, key, value);
+
+        token = strtok(NULL, "&");
+    }
 }
 
 StrHashMap* extractHeaders(char* headers) {

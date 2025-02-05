@@ -87,5 +87,12 @@ void handle_root(Request* request, Response* response) {
 void handle_html(Request* request, Response* response) {
     response->statusCode = OK;
     response->contentType = CT_TEXT_HTML;
-    response->content = fstring("<html><body><h2>TEST: %s</h2></body></html>", request->body);
+
+    char* name = get_shmap(request->req_line->req_params, "name");
+
+    if(name == NULL) {
+        response->content = fstring("<html><body><h2>TEST WITHOUT NAME</h2></body></html>");
+    } else {
+        response->content = fstring("<html><body><h2>TEST: %s</h2></body></html>", name);
+    }
 }

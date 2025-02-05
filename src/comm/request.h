@@ -18,6 +18,7 @@ typedef struct {
     RequestMethod method;
     char* path;
     Protocol protocol;
+    StrHashMap* req_params;
 } RequestLine;
 
 typedef struct {
